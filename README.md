@@ -42,4 +42,9 @@ This does not, however, affect functionality. You can still watch the shows, mov
 Second, sometimes a channel, show or movie will not load. Check to make sure it is not down at the website before blaming the plugin. 
 
 Third, ArconaiTV uses a type of javascript obfuscation that obscates obscated code. Yup. I wrote my own deobscation code (may be useful) that results in Dean Edwards packer obscuated code. This code was 
-then deobscated using jsbeautify. Keep in mind that arconaitv is liable to and probably will change their code. In the event that it does, *this plugin break*. I will try to fix it but no guarantees. 
+then deobscated using jsbeautify. Keep in mind that arconaitv is liable to and probably will change their code. In the event that it does, *this plugin will break*. I will try to fix it but no guarantees. 
+
+Finally, the three scraper files aren't really necessary as they don't do anything. The show descriptions are stored locally in a json formatted file in resources. The three aforementioned files were used 
+to create the json files. After that, you no longer need them. I don't have an api key for TVDB or TMDB and I don't intend to get one. ArconaiTV does not really have a practical way of getting their 
+artwork and summaries for all the shows so far as I can tell. Thus, the problem of show summaries and artwork remains open. Suggestions are welcome. Actually, I do have an api key for fanart.tv so the 
+artwork shouldn't be a problem, but the summaries are still problematic for me barring an api key or really annoying scraping. 
