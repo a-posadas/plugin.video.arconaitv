@@ -31,3 +31,15 @@ And that should be it.
 Please note that this plugin requires Muckys Common Libraries, specifically, jsbeautifier, to deobfuscate javascript, beautifulsoup, to parse HTML, and requests to make web requests. Most likely, your 
 Kodi installation will automatically download and install the libraries once you install this plugin (or you probably already have them). If not, you can find the zip here 
 (https://github.com/mucky-duck/mdrepo/tree/master/script.module.muckys.common).
+
+## Some Things You Should Know
+
+### This plugin is a work in progress!!!
+
+First of all, there is currently no artwork for the shows, movies and cable channels. Some of the descriptions are there but one, I got them from wikipedia and two a lot of the descriptions are missing. 
+This does not, however, affect functionality. You can still watch the shows, movies or channels. 
+
+Second, sometimes a channel, show or movie will not load. Check to make sure it is not down at the website before blaming the plugin. 
+
+Third, ArconaiTV uses a type of javascript obfuscation that obscates obscated code. Yup. I wrote my own deobscation code (may be useful) that results in Dean Edwards packer obscuated code. This code was 
+then deobscated using jsbeautify. Keep in mind that arconaitv is liable to and probably will change their code. In the event that it does, *this plugin break*. I will try to fix it but no guarantees. 
