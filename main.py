@@ -199,7 +199,5 @@ elif mode[0] == 'play':
 						params[idx] = int(param)
 				code = hunter(*params)
 	unpacked = packer.unpack(code)
-	xbmc.log(msg=unpacked,level=xbmc.LOGNOTICE)
 	video_location = unpacked[unpacked.rfind('http'):unpacked.rfind('m3u8')+4]
-	xbmc.log(msg=video_location,level=xbmc.LOGNOTICE)
 	xbmc.Player().play(item=video_location+'|User-Agent=%s' % urllib2.quote(USER_AGENT, safe=''))
