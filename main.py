@@ -15,11 +15,11 @@ base_url = sys.argv[0]
 addon_handle = int(sys.argv[1])
 args = urlparse.parse_qs(sys.argv[2][1:])
 arconaitv_url = "https://www.arconaitv.xyz/"
+mode = args.get('mode', None)
 
 IMAGES_PATH = os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'images')
 DESC_PATH = os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources')
-
-xbmcplugin.setContent(addon_handle, 'movies')
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36'
 
 def build_url(query):
 	return base_url + '?' + urllib.urlencode(query)
@@ -58,8 +58,6 @@ def hunter(h,u,n,t,e,r):
 		r = ''.join([r,''.join(map(chr, [duf(s,e,10) - t]))])
 		i = i + 1
 	return r
-
-mode = args.get('mode', None)
 
 if mode is None:
 	url = build_url({'mode': 'shows'})
@@ -204,4 +202,4 @@ elif mode[0] == 'play':
 	xbmc.log(msg=unpacked,level=xbmc.LOGNOTICE)
 	video_location = unpacked[unpacked.rfind('http'):unpacked.rfind('m3u8')+4]
 	xbmc.log(msg=video_location,level=xbmc.LOGNOTICE)
-	xbmc.Player().play(item=video_location+'|User-Agent=%s' % urllib2.quote('Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36', safe=''))
+	xbmc.Player().play(item=video_location+'|User-Agent=%s' % urllib2.quote(USER_AGENT, safe=''))
