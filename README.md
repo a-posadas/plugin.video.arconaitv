@@ -48,3 +48,5 @@ Finally, the three scraper files aren't really necessary as they don't do anythi
 to create the json files. After that, you no longer need them. I don't have an api key for TVDB or TMDB and I don't intend to get one. ArconaiTV does not really have a practical way of getting their 
 artwork and summaries for all the shows so far as I can tell. Thus, the problem of show summaries and artwork remains open. Suggestions are welcome. Actually, I do have an api key for fanart.tv so the 
 artwork shouldn't be a problem, but the summaries are still problematic for me barring an api key or really annoying scraping. 
+
+If you like this project consider making a donation by contacting me here on github. 
