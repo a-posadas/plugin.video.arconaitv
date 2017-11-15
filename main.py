@@ -59,7 +59,7 @@ def hunter(h,u,n,t,e,r):
 		i = i + 1
 	return r
 
-if mode is None:
+def list_categories():
 	url = build_url({'mode': 'shows'})
 	li = xbmcgui.ListItem("24/7 TV Shows")
 	shows_img = os.path.join(IMAGES_PATH, 'tv.png')
@@ -86,7 +86,7 @@ if mode is None:
 
         xbmcplugin.endOfDirectory(addon_handle)
 
-elif mode[0] == 'shows':
+def list_shows():
 	arconaitv_r = requests.get(arconaitv_url+"index.php")
 	html_text = arconaitv_r.text.encode('ascii', 'ignore')
 	soup = BeautifulSoup(html_text, 'html.parser')
@@ -109,7 +109,8 @@ elif mode[0] == 'shows':
 		for show in parsed['shows']:
 			if title == show['show']:
 				il={"plot": show['description'],"plotoutline":show['description']}
-		li.setInfo(type='video', infoLabels=il)
+		li.setProperty('IsPlayable', 'true')
+		li.setInfo(type='files', infoLabels=il)
 		listItemlist.append([url,li,False])
 
 	listLength = len(listItemlist)
@@ -117,7 +118,7 @@ elif mode[0] == 'shows':
 	xbmcplugin.setContent(addon_handle, 'tvshows')
 	xbmcplugin.endOfDirectory(addon_handle)
 
-elif mode[0] == 'cable':
+def list_cable():
 	arconaitv_r = requests.get(arconaitv_url+"index.php")
         html_text = arconaitv_r.text.encode('ascii', 'ignore')
         soup = BeautifulSoup(html_text, 'html.parser')
@@ -140,7 +141,8 @@ elif mode[0] == 'cable':
                 for station in parsed['cable']:
                         if title == station['station']:
                                 il={"plot": station['description'],"plotoutline":station['description']}
-                li.setInfo(type='video', infoLabels=il)
+		li.setProperty('IsPlayable', 'true')
+                li.setInfo(type='files', infoLabels=il)
                 listItemlist.append([url,li,False])
 
         listLength = len(listItemlist)
@@ -148,7 +150,7 @@ elif mode[0] == 'cable':
         xbmcplugin.setContent(addon_handle, 'tvshows')
         xbmcplugin.endOfDirectory(addon_handle)
 
-elif mode[0] == 'movies':
+def list_movies():
 	arconaitv_r = requests.get(arconaitv_url+"index.php")
 	html_text = arconaitv_r.text.encode('ascii', 'ignore')
 	soup = BeautifulSoup(html_text, 'html.parser')
@@ -171,7 +173,9 @@ elif mode[0] == 'movies':
                 for movie in parsed['movies']:
                         if title == movie['movie']:
                                 il={"plot": movie['description'],"plotoutline":movie['description']}
-                li.setInfo(type='video', infoLabels=il)
+		li.setProperty('IsPlayable', 'True')
+		li.setProperty('mimetype', 'application/x-mpegURL') 
+                li.setInfo(type='files', infoLabels=il)
                 listItemlist.append([url,li,False])
 
         listLength = len(listItemlist)
@@ -180,9 +184,8 @@ elif mode[0] == 'movies':
         xbmcplugin.endOfDirectory(addon_handle)
 
 
-elif mode[0] == 'play':
-	selection = args.get('selection',None)
-	r = requests.get(arconaitv_url+selection[0])
+def play_video(selection):
+	r = requests.get(arconaitv_url+selection)
 	html_text = r.text.encode('ascii', 'ignore')
 	soup = BeautifulSoup(html_text, 'html.parser')
 	scripts = soup.find_all('script')
@@ -200,4 +203,23 @@ elif mode[0] == 'play':
 				code = hunter(*params)
 	unpacked = packer.unpack(code)
 	video_location = unpacked[unpacked.rfind('http'):unpacked.rfind('m3u8')+4]
-	xbmc.Player().play(item=video_location+'|User-Agent=%s' % urllib2.quote(USER_AGENT, safe=''))
+	play_item = xbmcgui.ListItem(path=video_location+'|User-Agent=%s' % urllib2.quote(USER_AGENT, safe=''))
+	xbmcplugin.setResolvedUrl(addon_handle, True, listitem=play_item)
+
+#	xbmc.Player().play(item=video_location+'|User-Agent=%s' % urllib2.quote(USER_AGENT, safe=''))
+
+def router(params):
+	if params:
+		if params['mode'][0] == 'shows':
+			list_shows()
+		elif params['mode'][0] == 'cable':
+			list_cable()
+		elif params['mode'][0] == 'movies':
+			list_movies()
+		elif params['mode'][0] == 'play':
+			play_video(params['selection'][0])
+	else:
+		list_categories()
+
+if __name__ == '__main__':
+	router(args)
