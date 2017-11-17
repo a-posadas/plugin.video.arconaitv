@@ -21,6 +21,7 @@ IMAGES_PATH = os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 
 DESC_PATH = os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources')
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36'
 
+
 def build_url(query):
 	return base_url + '?' + urllib.urlencode(query)
 
@@ -59,6 +60,32 @@ def hunter(h,u,n,t,e,r):
 		i = i + 1
 	return r
 
+def getShowInfo(title):
+	desc_file = os.path.join(DESC_PATH, 'shows.json')
+	with open(desc_file) as file:
+		data = file.read()
+
+	parsed = json.loads(data)
+
+	for show in parsed['shows']:
+		if title == show['title']:
+			return show
+
+	return {'title':title+' wtf','description':'wtf','poster':'DefaultVideo.png'} # Should Never Get Here
+
+def getCableInfo(title):
+	desc_file = os.path.join(DESC_PATH, 'cable.json')
+	with open(desc_file) as file:
+		data = file.read()
+
+	parsed = json.loads(data)
+
+	for cable in parsed['cable']:
+		if title == cable['station']:
+			return cable
+
+	return {'title':title+' wtf','description':'wtf','logo':'DefaultVideo.png'} # Should Never Get Here
+
 def list_categories():
 	url = build_url({'mode': 'shows'})
 	li = xbmcgui.ListItem("24/7 TV Shows")
@@ -93,24 +120,19 @@ def list_shows():
 	shows = soup.find("div", id="shows")
 	boxes = shows.find_all("div", class_="box-content")
 
-	desc_file = os.path.join(DESC_PATH, 'shows.json')
-	with open(desc_file) as file:
-		data = file.read()
-
-	parsed = json.loads(data)
 	listItemlist = []
 	for box in boxes:
 		if box.a == None:
 			continue
 
 		url = build_url({'mode': 'play', 'selection': box.a["href"]})
-		title = box.a["title"]
-		li = xbmcgui.ListItem(title, iconImage='DefaultVideo.png')
-		for show in parsed['shows']:
-			if title == show['show']:
-				il={"plot": show['description'],"plotoutline":show['description']}
+		title = box.a["title"].strip()
+		showInfo = getShowInfo(title)
+		li = xbmcgui.ListItem(showInfo['title'], iconImage=showInfo['poster'])
+		il={"Title": title,"mediatype":"video","plot": showInfo['description'],"plotoutline": showInfo['description']}
 		li.setProperty('IsPlayable', 'true')
-		li.setInfo(type='files', infoLabels=il)
+		li.setInfo(type='video', infoLabels=il)
+		li.setArt({ 'poster': showInfo['poster'], 'banner' : showInfo['poster'] })
 		listItemlist.append([url,li,False])
 
 	listLength = len(listItemlist)
@@ -125,24 +147,18 @@ def list_cable():
         cable = soup.find("div", id="cable")
         boxes = cable.find_all("div", class_="box-content")
 
-        desc_file = os.path.join(DESC_PATH, 'cable.json')
-        with open(desc_file) as file:
-                data = file.read()
-
-        parsed = json.loads(data)
         listItemlist = []
         for box in boxes:
                 if box.a == None:
                         continue
 
                 url = build_url({'mode': 'play', 'selection': box.a["href"]})
-                title = box.a["title"]
-                li = xbmcgui.ListItem(title, iconImage='DefaultVideo.png')
-                for station in parsed['cable']:
-                        if title == station['station']:
-                                il={"plot": station['description'],"plotoutline":station['description']}
+                title = box.a["title"].strip()
+		cableInfo = getCableInfo(title)
+                li = xbmcgui.ListItem(title, iconImage=cableInfo['logo'])
+		il={"Title": title,"mediatype":"video","plot": cableInfo['description'],"plotoutline": cableInfo['description']}
 		li.setProperty('IsPlayable', 'true')
-                li.setInfo(type='files', infoLabels=il)
+                li.setInfo(type='video', infoLabels=il)
                 listItemlist.append([url,li,False])
 
         listLength = len(listItemlist)
@@ -157,11 +173,6 @@ def list_movies():
 	movies = soup.find("div", id="movies")
         boxes = movies.find_all("div", class_="box-content")
 
-        desc_file = os.path.join(DESC_PATH, 'movies.json')
-        with open(desc_file) as file:
-                data = file.read()
-
-        parsed = json.loads(data)
         listItemlist = []
         for box in boxes:
                 if box.a == None:
@@ -170,12 +181,10 @@ def list_movies():
                 url = build_url({'mode': 'play', 'selection': box.a["href"]})
                 title = box.a["title"]
                 li = xbmcgui.ListItem(title, iconImage='DefaultVideo.png')
-                for movie in parsed['movies']:
-                        if title == movie['movie']:
-                                il={"plot": movie['description'],"plotoutline":movie['description']}
+		il={"Title": title,"mediatype":"video"}
 		li.setProperty('IsPlayable', 'True')
 		li.setProperty('mimetype', 'application/x-mpegURL') 
-                li.setInfo(type='files', infoLabels=il)
+                li.setInfo(type='video', infoLabels=il)
                 listItemlist.append([url,li,False])
 
         listLength = len(listItemlist)
@@ -205,8 +214,6 @@ def play_video(selection):
 	video_location = unpacked[unpacked.rfind('http'):unpacked.rfind('m3u8')+4]
 	play_item = xbmcgui.ListItem(path=video_location+'|User-Agent=%s' % urllib2.quote(USER_AGENT, safe=''))
 	xbmcplugin.setResolvedUrl(addon_handle, True, listitem=play_item)
-
-#	xbmc.Player().play(item=video_location+'|User-Agent=%s' % urllib2.quote(USER_AGENT, safe=''))
 
 def router(params):
 	if params:
