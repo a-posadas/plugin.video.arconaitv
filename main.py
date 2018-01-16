@@ -81,7 +81,8 @@ def aadecode(code):
 	code = code.replace('[','["')
 	code = code.replace(']','"]')
 	
-	#Remove call comments from code
+	#Remove all comments from code
+	# see https://stackoverflow.com/questions/5989315/regex-for-match-replacing-javascript-comments-both-multiline-and-inline
 	p = re.compile('\/\*.+?\*\/|\/\/.*(?=[\n\r])')
 	code = p.sub('',code)
 
