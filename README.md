@@ -1,3 +1,6 @@
+#DO NOT USE THIS PLUGIN
+#THE USE OF EVAL FUNCTION IS NOT CURRENTLY SAFE
+#
 # plugin.video.arconaitv
 A way to watch arconaitv content from Kodi.
 
