@@ -29,7 +29,7 @@ def build_url(query):
 
 #These variables are global because they need to be called from two different functions.
 #They pertain to each line referenced here https://stackoverflow.com/questions/8883999/how-do-these-javascript-obfuscators-generate-actual-working-code#answer-8885873
-#1
+#1 On this one I take a shortcut. I knew ahead of time the value of the first variable is undefined.
 ff9f03c9ff9fff89 = "undefined"
 #2
 o=ff9fff70ff9f=_=3
@@ -44,13 +44,13 @@ ff9f0414ff9f={'ff9f0398ff9f': '_' ,
 				'ff9f0414ff9fff89': (str(ff9fff70ff9f==3) +'_')[ff9fff70ff9f] }
 #6
 ff9f0414ff9f [ff9f0398ff9f] =(str(ff9f03c9ff9fff89==3) +'_') [c^_^o];
-#7
+#7 Another shortcut. The javascript evaluates to the string "[object Object]"
 ff9f0414ff9f ['c'] = "[object Object]" [ ff9fff70ff9f+ff9fff70ff9f-ff9f0398ff9f ]
 #8
 ff9f0414ff9f ['o'] = "[object Object]"[ff9f0398ff9f]
 #9
 ff9foff9f = ff9f0414ff9f['c'] + ff9f0414ff9f['o'] + (ff9f03c9ff9fff89 + '_')[ff9f0398ff9f] + (str(ff9f03c9ff9fff89==3) + '_')[ff9fff70ff9f] + "[object Object]"[ff9fff70ff9f+ff9fff70ff9f] + (str(ff9fff70ff9f==3) + '_')[ff9f0398ff9f] + (str(ff9fff70ff9f==3) + '_')[ff9fff70ff9f - ff9f0398ff9f] + ff9f0414ff9f['c'] + "[object Object]"[ff9fff70ff9f+ff9fff70ff9f] + ff9f0414ff9f['o'] + (str(ff9fff70ff9f==3) + '_')[ff9f0398ff9f]
-#10
+#10 Another shortcut
 ff9f0414ff9f['_'] = 'Function'
 #11
 ff9f03b5ff9f = (str(ff9fff70ff9f==3)+'_')[ff9f0398ff9f] + ff9f0414ff9f['ff9f0414ff9fff89'] + '[object Object]'[ff9fff70ff9f + ff9fff70ff9f] + (str(ff9fff70ff9f==3)+'_')[o^_^o - ff9f0398ff9f] + (str(ff9fff70ff9f==3)+'_')[ff9f0398ff9f] + (ff9f03c9ff9fff89+'_')[ff9f0398ff9f]
