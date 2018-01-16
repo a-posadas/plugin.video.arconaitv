@@ -27,6 +27,8 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, li
 def build_url(query):
 	return base_url + '?' + urllib.urlencode(query)
 
+#These variables are global because they need to be called from two different functions.
+#They pertain to each line referenced here https://stackoverflow.com/questions/8883999/how-do-these-javascript-obfuscators-generate-actual-working-code#answer-8885873
 #1
 ff9f03c9ff9fff89 = "undefined"
 #2
@@ -62,21 +64,32 @@ ff9f0414ff9f['ff9f0398ff9fff89']=('[object Object]' + str(ff9fff70ff9f))[o^_^o -
 off9fff70ff9fo=(ff9f03c9ff9fff89+'_')[c^_^o];
 #16
 ff9f0414ff9f['ff9foff9f']='\\"'
-
+#17
 def aadecode(code):
 	js_list = code.split(';')
+	#At the end of the day, all we really want is the code pertaining to the hidden code, the rest we did with the global variables.
+	#So we can just split the whole string by semi-colons and get the third to last element in the list. The third to last because there are two semi-colons at the end. 
 	code = js_list[-3]
+	#Encode string into unicode escape
 	code = code.encode('unicode_escape')
+	#Remove the \u from the character, that is the global variable name
 	code = code.replace('\\u','')
+	#Remove the function calls at the beginning and end of javascript
 	code = code[45:-7]
 
+	#Add quotations to call dictionary elements from string (probably unecessary.)
 	code = code.replace('[','["')
 	code = code.replace(']','"]')
+	
+	#Remove call comments from code
 	p = re.compile('\/\*.+?\*\/|\/\/.*(?=[\n\r])')
 	code = p.sub('',code)
 
+	#split code to get individual variables
 	code_list = code.split('+')
 
+	#for each element in code_list, try eval, if it succeeds add it to complete, 
+	#otherwise add the next element to it and try eval again. Repeat until eval is successful. 
 	idx = 0
 	eval_this = code_list[idx]
 	complete = str(iseval(eval_this))
@@ -90,8 +103,12 @@ def aadecode(code):
 			eval_this = eval_this + '+' + str(code_list[idx+1])
 			idx = idx + 1
 
+	#the variable complete is something like return\\"\\NNNN\\NNNN\\NNNN
+	#remove return\\" and keep the escaped string 
 	complete = complete.replace('return\\"','')
+	#unescape double back slash
 	complete = complete.replace('\\\\','\\')
+	#convert escaped string to unicode characters
 	complete = complete.decode('unicode_escape')
 	return complete
 
@@ -106,7 +123,6 @@ def getShowInfo(title):
 	desc_file = os.path.join(DESC_PATH, 'shows.json')
 	with open(desc_file) as file:
 		data = file.read()
-
 	parsed = json.loads(data)
 
 	for show in parsed['shows']:
@@ -244,9 +260,11 @@ def play_video(selection):
 		if script.string is not None:
 			if "document.getElementsByTagName('video')[0].volume = 1.0;" in script.string:
 				code = script.string
+				# Here is the call to the first part of the deobfuscation i.e. getting packed code
 				code = aadecode(code)
 
 				xbmc.log(code, xbmc.LOGNOTICE)
+	#The second part of deobfuscation occurs here. Using module jsbeautifier. 
 	unpacked = packer.unpack(code)
 	video_location = unpacked[unpacked.rfind('http'):unpacked.rfind('m3u8')+4]
 	play_item = xbmcgui.ListItem(path=video_location+'|User-Agent=%s' % urllib2.quote(USER_AGENT, safe=''))
