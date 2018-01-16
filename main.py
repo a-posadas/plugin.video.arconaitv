@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import sys
 import urllib
 import urllib2
@@ -10,6 +11,7 @@ from bs4 import BeautifulSoup
 import jsbeautifier.unpackers.packer as packer
 import os.path
 import json
+import re
 
 base_url = sys.argv[0]
 addon_handle = int(sys.argv[1])
@@ -25,40 +27,80 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, li
 def build_url(query):
 	return base_url + '?' + urllib.urlencode(query)
 
-def duf(d,e,f):
-	g = list("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/")
-	h = g[0:e]
-	i = g[0:f]
-	d = list(d)[::-1]
-	j = 0
-	for c,b in enumerate(d):
-		if b in h:
-			j = j + h.index(b)*e**c
+#1
+ff9f03c9ff9fff89 = "undefined"
+#2
+o=ff9fff70ff9f=_=3
+#3
+c=ff9f0398ff9f=ff9fff70ff9f-ff9fff70ff9f
+#4
+ff9f0414ff9f = ff9f0398ff9f = o^_^o/ o^_^o
+#5
+ff9f0414ff9f={'ff9f0398ff9f': '_' ,
+				'ff9f03c9ff9fff89' : (str(ff9f03c9ff9fff89==3) + '_')[ff9f0398ff9f] ,
+				'ff9fff70ff9fff89' : (str(ff9f03c9ff9fff89) + '_')[o^_^o - ff9f0398ff9f] ,
+				'ff9f0414ff9fff89': (str(ff9fff70ff9f==3) +'_')[ff9fff70ff9f] }
+#6
+ff9f0414ff9f [ff9f0398ff9f] =(str(ff9f03c9ff9fff89==3) +'_') [c^_^o];
+#7
+ff9f0414ff9f ['c'] = "[object Object]" [ ff9fff70ff9f+ff9fff70ff9f-ff9f0398ff9f ]
+#8
+ff9f0414ff9f ['o'] = "[object Object]"[ff9f0398ff9f]
+#9
+ff9foff9f = ff9f0414ff9f['c'] + ff9f0414ff9f['o'] + (ff9f03c9ff9fff89 + '_')[ff9f0398ff9f] + (str(ff9f03c9ff9fff89==3) + '_')[ff9fff70ff9f] + "[object Object]"[ff9fff70ff9f+ff9fff70ff9f] + (str(ff9fff70ff9f==3) + '_')[ff9f0398ff9f] + (str(ff9fff70ff9f==3) + '_')[ff9fff70ff9f - ff9f0398ff9f] + ff9f0414ff9f['c'] + "[object Object]"[ff9fff70ff9f+ff9fff70ff9f] + ff9f0414ff9f['o'] + (str(ff9fff70ff9f==3) + '_')[ff9f0398ff9f]
+#10
+ff9f0414ff9f['_'] = 'Function'
+#11
+ff9f03b5ff9f = (str(ff9fff70ff9f==3)+'_')[ff9f0398ff9f] + ff9f0414ff9f['ff9f0414ff9fff89'] + '[object Object]'[ff9fff70ff9f + ff9fff70ff9f] + (str(ff9fff70ff9f==3)+'_')[o^_^o - ff9f0398ff9f] + (str(ff9fff70ff9f==3)+'_')[ff9f0398ff9f] + (ff9f03c9ff9fff89+'_')[ff9f0398ff9f]
+#12
+ff9fff70ff9f = ff9fff70ff9f + ff9f0398ff9f
+#13
+ff9f0414ff9f['ff9f03b5ff9f']='\\\\';
+#14
+ff9f0414ff9f['ff9f0398ff9fff89']=('[object Object]' + str(ff9fff70ff9f))[o^_^o -(ff9f0398ff9f)]
+#15
+off9fff70ff9fo=(ff9f03c9ff9fff89+'_')[c^_^o];
+#16
+ff9f0414ff9f['ff9foff9f']='\\"'
 
-	k = ""
-	while j > 0:
-		k = i[j%f] + k
-		j = (j - (j%f))//f
+def aadecode(code):
+	js_list = code.split(';')
+	code = js_list[-3]
+	code = code.encode('unicode_escape')
+	code = code.replace('\\u','')
+	code = code[45:-7]
 
-	return int(k) or 0
+	code = code.replace('[','["')
+	code = code.replace(']','"]')
+	p = re.compile('\/\*.+?\*\/|\/\/.*(?=[\n\r])')
+	code = p.sub('',code)
 
-def hunter(h,u,n,t,e,r):
-	r = "";
-	i = 0
-	while i < len(h):
-		j = 0
-		s = ""
-		while h[i] is not n[e]:
-			s = ''.join([s,h[i]])
-			i = i + 1
+	code_list = code.split('+')
 
-		while  j < len(n):
-			s = s.replace(n[j],str(j))
-			j = j + 1
+	idx = 0
+	eval_this = code_list[idx]
+	complete = str(iseval(eval_this))
+	complete = ''
+	while idx < len(code_list)-1:
+		if iseval(eval_this):
+			complete = complete + str(eval(eval_this))
+			idx = idx + 1
+			eval_this = str(code_list[idx])
+		else:
+			eval_this = eval_this + '+' + str(code_list[idx+1])
+			idx = idx + 1
 
-		r = ''.join([r,''.join(map(chr, [duf(s,e,10) - t]))])
-		i = i + 1
-	return r
+	complete = complete.replace('return\\"','')
+	complete = complete.replace('\\\\','\\')
+	complete = complete.decode('unicode_escape')
+	return complete
+
+def iseval(character):
+	try:
+		eval(character)
+		return True
+	except:
+		return False
 
 def getShowInfo(title):
 	desc_file = os.path.join(DESC_PATH, 'shows.json')
@@ -168,7 +210,7 @@ def list_cable():
 
 def list_movies():
 	arconaitv_r = requests.get(arconaitv_url+"index.php")
-	html_text = arconaitv_r.text.encode('ascii', 'ignore')
+	html_text = arconaitv_r.text.encode('ascii','ignore')
 	soup = BeautifulSoup(html_text, 'html.parser')
 	movies = soup.find("div", id="movies")
         boxes = movies.find_all("div", class_="box-content")
@@ -195,21 +237,16 @@ def list_movies():
 
 def play_video(selection):
 	r = requests.get(arconaitv_url+selection)
-	html_text = r.text.encode('ascii', 'ignore')
+	html_text = r.text
 	soup = BeautifulSoup(html_text, 'html.parser')
 	scripts = soup.find_all('script')
 	for script in scripts:
 		if script.string is not None:
 			if "document.getElementsByTagName('video')[0].volume = 1.0;" in script.string:
-				idx = script.string.index("var")
-				code = script.string[idx:]
-				params = code[code.index('return r}(')+10:code.rfind('))')]
-				params = params.replace('"','')
-				params = params.split(',')
-				for idx,param in enumerate(params):
-					if param.isdigit():
-						params[idx] = int(param)
-				code = hunter(*params)
+				code = script.string
+				code = aadecode(code)
+
+				xbmc.log(code, xbmc.LOGNOTICE)
 	unpacked = packer.unpack(code)
 	video_location = unpacked[unpacked.rfind('http'):unpacked.rfind('m3u8')+4]
 	play_item = xbmcgui.ListItem(path=video_location+'|User-Agent=%s' % urllib2.quote(USER_AGENT, safe=''))
