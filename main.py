@@ -88,7 +88,7 @@ def aadecode(objscode):
 	ff9f0414ff9f['ff9f0398ff9fff89']=('[object Object]' + str(ff9fff70ff9f))[o^_^o -(ff9f0398ff9f)]
 	vars_list.update({'ff9f0414ff9f':ff9f0414ff9f})
 	#15
-	off9fff70ff9fo=(ff9f03c9ff9fff89+'_')[c^_^o];
+	off9fff70ff9fo=(ff9f03c9ff9fff89+'_')[c^_^o]
 	vars_list.update({'off9fff70ff9fo':off9fff70ff9fo})
 	#16
 	ff9f0414ff9f['ff9foff9f']='\\"'
