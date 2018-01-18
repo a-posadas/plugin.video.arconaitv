@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import unicode_literals # turns everything to unicode
 import sys
 import urllib
 import urllib2
@@ -23,102 +23,174 @@ IMAGES_PATH = os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 
 DESC_PATH = os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources')
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36'
 
+vars_list = {};
+
+def evalxor(str):
+	vars = str.split('^')
+	index = 0
+	value = vars_list[vars[index].strip()]
+	while index < len(vars)-1:
+		value = value^ vars_list[vars[index+1].strip()]
+		index=index+1
+	return value
+
+def aadecode(objscode):
+	# The basic method for deobfuscating aaencoded javascript is outlined here:
+	# https://stackoverflow.com/questions/8883999/how-do-these-javascript-obfuscators-generate-actual-working-code#answer-8885873
+	# These are the variables 1 - 16 as on the link. I also make them into dictionary entries to avoid using eval
+	#1
+	ff9f03c9ff9fff89='undefined'
+	vars_list.update({'ff9f03c9ff9fff89':'undefined'})
+	#2
+	o=ff9fff70ff9f=_=3
+	vars_list.update({'o':o})
+	vars_list.update({'ff9fff70ff9f':ff9fff70ff9f})
+	vars_list.update({'_':_})
+	#3
+	c=ff9f0398ff9f=ff9fff70ff9f-ff9fff70ff9f
+	vars_list.update({'ff9f0398ff9f':ff9f0398ff9f})
+	vars_list.update({'c':c})
+	#4
+	ff9f0414ff9f = ff9f0398ff9f = o^_^o/ o^_^o
+	vars_list.update({'ff9f0414ff9f':ff9f0414ff9f})
+	vars_list.update({'ff9f0398ff9f':ff9f0398ff9f})
+	#5
+	ff9f0414ff9f={'ff9f0398ff9f': '_' ,
+					'ff9f03c9ff9fff89' : (str(ff9f03c9ff9fff89==3) + '_')[ff9f0398ff9f] ,
+					'ff9fff70ff9fff89' : (str(ff9f03c9ff9fff89) + '_')[o^_^o - ff9f0398ff9f] ,
+					'ff9f0414ff9fff89': (str(ff9fff70ff9f==3) +'_')[ff9fff70ff9f] }
+	vars_list.update({'ff9f0414ff9f':ff9f0414ff9f})
+	#6
+	ff9f0414ff9f [ff9f0398ff9f] = (str(ff9f03c9ff9fff89==3) +'_') [c^_^o];
+	vars_list.update({'ff9f0414ff9f':ff9f0414ff9f})
+	#7
+	ff9f0414ff9f ['c'] = "[object Object]" [ ff9fff70ff9f+ff9fff70ff9f-ff9f0398ff9f ]
+	vars_list.update({'ff9f0414ff9f':ff9f0414ff9f})
+	#8
+	ff9f0414ff9f ['o'] = "[object Object]" [ff9f0398ff9f];
+	vars_list.update({'ff9f0414ff9f':ff9f0414ff9f})
+	#9
+	ff9foff9f=ff9f0414ff9f ['c'] + ff9f0414ff9f ['o'] + (ff9f03c9ff9fff89 +'_')[ff9f0398ff9f] + (str(ff9f03c9ff9fff89==3) +'_')[ff9fff70ff9f] + "[object Object]"[ff9fff70ff9f+ff9fff70ff9f] + (str(ff9fff70ff9f==3) +'_')[ff9f0398ff9f] + (str(ff9fff70ff9f==3) +'_')[ff9fff70ff9f - ff9f0398ff9f] + ff9f0414ff9f ['c'] + "[object Object]" [ff9fff70ff9f+ff9fff70ff9f] + ff9f0414ff9f ['o'] + (str(ff9fff70ff9f==3) +'_')[ff9f0398ff9f]
+	vars_list.update({'ff9foff9f':ff9foff9f})
+	#10
+	ff9f0414ff9f['_'] = 'Function'
+	vars_list.update({'ff9f0414ff9f':ff9f0414ff9f})
+	#11
+	ff9f03b5ff9f = (str(ff9fff70ff9f==3)+'_')[ff9f0398ff9f] + ff9f0414ff9f['ff9f0414ff9fff89'] + '[object Object]'[ff9fff70ff9f + ff9fff70ff9f] + (str(ff9fff70ff9f==3)+'_')[o^_^o - ff9f0398ff9f] + (str(ff9fff70ff9f==3)+'_')[ff9f0398ff9f] + (ff9f03c9ff9fff89+'_')[ff9f0398ff9f]
+	vars_list.update({'ff9f03b5ff9f':ff9f03b5ff9f})
+	#12
+	ff9fff70ff9f = ff9fff70ff9f + ff9f0398ff9f
+	vars_list.update({'ff9fff70ff9f':ff9fff70ff9f})
+	#13
+	ff9f0414ff9f['ff9f03b5ff9f']='\\\\';
+	vars_list.update({'ff9f0414ff9f':ff9f0414ff9f})
+	#14
+	ff9f0414ff9f['ff9f0398ff9fff89']=('[object Object]' + str(ff9fff70ff9f))[o^_^o -(ff9f0398ff9f)]
+	vars_list.update({'ff9f0414ff9f':ff9f0414ff9f})
+	#15
+	off9fff70ff9fo=(ff9f03c9ff9fff89+'_')[c^_^o];
+	vars_list.update({'off9fff70ff9fo':off9fff70ff9fo})
+	#16
+	ff9f0414ff9f['ff9foff9f']='\\"'
+	vars_list.update({'ff9f0414ff9f':ff9f0414ff9f})
+
+	# First we split the code by semi-colon. We only want the third to last entrie because that is the obfuscated javascript. The rest we do in python.
+	js_list = objscode.split(';')
+	code = js_list[-3]
+	# unicode_escape the code so that we can use regular letters and numbers and not those funky symbols
+	code = code.encode('unicode_escape')
+
+	code = code.replace('\\u','')
+	code = code[45:-7]
+
+	#Remove all comments from code
+    # see https://stackoverflow.com/questions/5989315/regex-for-match-replacing-javascript-comments-both-multiline-and-inline
+	p = re.compile('\/\*.+?\*\/|\/\/.*(?=[\n\r])')
+	code = p.sub('',code)
+
+	# Split all the code by plus sign.
+	code_list = code.split('+')
+	new_list = []
+	idx=0
+
+	while idx<len(code_list):
+		code = code_list[idx].strip()
+		#First get all the values in single parentheses and evaluate it
+		if code.startswith('(') and not code.startswith('((') and code.endswith(')') and not code.endswith('))') and not '[' in code:
+			code = code.replace('(','')
+			code = code.replace(')','')
+			if '^' not in code:
+				code = vars_list[code]
+				new_list.append(code)
+			else:
+				value = evalxor(code)
+				new_list.append(value)
+			idx=idx+1
+		#These are the dictionaries or objects in js
+		elif '[' in code and code.endswith(']'):
+			code = code.replace('(','')
+			code = code.replace(')','')
+			array_rep = code.split('[')
+			array_rep[1] = array_rep[1].replace(']','')
+			code = vars_list[array_rep[0]][array_rep[1]]
+			new_list.append(code)
+			idx=idx+1
+		#At the end there is an object that has another variable after it so it doesn't end in a bracket.
+		# it only occurs once and it's only a quotation mars so it is safe to delete.
+		elif '[' in code and not code.endswith(']'):
+			new_list.append(code)
+			idx=idx+1
+		#Double parentheses stuff adding and subtracting values
+		elif code.startswith('(('):
+			while not code.endswith('))'):
+				idx=idx+1
+				code = code + '+' + code_list[idx].strip()
+			#I just assume there will only be two values to add or subtract
+			if '+' in code:
+				add_this = code.split('+')
+				index=0
+				while index < len(add_this):
+					add_this[index] = add_this[index].replace('(','').replace(')','')
+					if '^' in add_this[index]:
+						add_this[index] = evalxor(add_this[index])
+					else:
+						add_this[index] = vars_list[add_this[index]]
+					index = index+1
+				code = add_this[0] + add_this[1]
+
+			elif '-' in code:
+				sub_this = code.split('-')
+				index=0
+				while index < len(sub_this):
+					sub_this[index] = sub_this[index].replace('(','').replace(')','')
+					if '^' in sub_this[index]:
+						sub_this[index] = evalxor(sub_this[index])
+					else:
+						sub_this[index] = vars_list[sub_this[index].strip()]
+					index=index+1
+				code = sub_this[0] - sub_this[1]
+			new_list.append(code)
+			idx=idx+1
+		else:
+			#The default if the variable just occurs on its own 
+			code = vars_list[code]
+			new_list.append(code)
+			idx=idx+1
+
+	#put it all together. Remove the first and second elements because they are return\" 
+	#we don't need the last element either, it was never evaluated, I think it comes out to a quotation mark
+	#in any case unecessary
+	complete = ''
+	idx = 2
+	while idx < len(new_list) - 1:
+		complete = complete+str(new_list[idx])
+		idx=idx+1
+
+	return complete.decode('unicode_escape').decode('unicode_escape').strip()
 
 def build_url(query):
 	return base_url + '?' + urllib.urlencode(query)
 
-#These variables are global because they need to be called from two different functions.
-#They pertain to each line referenced here https://stackoverflow.com/questions/8883999/how-do-these-javascript-obfuscators-generate-actual-working-code#answer-8885873
-#1 On this one I take a shortcut. I knew ahead of time the value of the first variable is undefined.
-ff9f03c9ff9fff89 = "undefined"
-#2
-o=ff9fff70ff9f=_=3
-#3
-c=ff9f0398ff9f=ff9fff70ff9f-ff9fff70ff9f
-#4
-ff9f0414ff9f = ff9f0398ff9f = o^_^o/ o^_^o
-#5
-ff9f0414ff9f={'ff9f0398ff9f': '_' ,
-				'ff9f03c9ff9fff89' : (str(ff9f03c9ff9fff89==3) + '_')[ff9f0398ff9f] ,
-				'ff9fff70ff9fff89' : (str(ff9f03c9ff9fff89) + '_')[o^_^o - ff9f0398ff9f] ,
-				'ff9f0414ff9fff89': (str(ff9fff70ff9f==3) +'_')[ff9fff70ff9f] }
-#6
-ff9f0414ff9f [ff9f0398ff9f] =(str(ff9f03c9ff9fff89==3) +'_') [c^_^o];
-#7 Another shortcut. The javascript evaluates to the string "[object Object]"
-ff9f0414ff9f ['c'] = "[object Object]" [ ff9fff70ff9f+ff9fff70ff9f-ff9f0398ff9f ]
-#8
-ff9f0414ff9f ['o'] = "[object Object]"[ff9f0398ff9f]
-#9
-ff9foff9f = ff9f0414ff9f['c'] + ff9f0414ff9f['o'] + (ff9f03c9ff9fff89 + '_')[ff9f0398ff9f] + (str(ff9f03c9ff9fff89==3) + '_')[ff9fff70ff9f] + "[object Object]"[ff9fff70ff9f+ff9fff70ff9f] + (str(ff9fff70ff9f==3) + '_')[ff9f0398ff9f] + (str(ff9fff70ff9f==3) + '_')[ff9fff70ff9f - ff9f0398ff9f] + ff9f0414ff9f['c'] + "[object Object]"[ff9fff70ff9f+ff9fff70ff9f] + ff9f0414ff9f['o'] + (str(ff9fff70ff9f==3) + '_')[ff9f0398ff9f]
-#10 Another shortcut
-ff9f0414ff9f['_'] = 'Function'
-#11
-ff9f03b5ff9f = (str(ff9fff70ff9f==3)+'_')[ff9f0398ff9f] + ff9f0414ff9f['ff9f0414ff9fff89'] + '[object Object]'[ff9fff70ff9f + ff9fff70ff9f] + (str(ff9fff70ff9f==3)+'_')[o^_^o - ff9f0398ff9f] + (str(ff9fff70ff9f==3)+'_')[ff9f0398ff9f] + (ff9f03c9ff9fff89+'_')[ff9f0398ff9f]
-#12
-ff9fff70ff9f = ff9fff70ff9f + ff9f0398ff9f
-#13
-ff9f0414ff9f['ff9f03b5ff9f']='\\\\';
-#14
-ff9f0414ff9f['ff9f0398ff9fff89']=('[object Object]' + str(ff9fff70ff9f))[o^_^o -(ff9f0398ff9f)]
-#15
-off9fff70ff9fo=(ff9f03c9ff9fff89+'_')[c^_^o];
-#16
-ff9f0414ff9f['ff9foff9f']='\\"'
-#17
-def aadecode(code):
-	js_list = code.split(';')
-	#At the end of the day, all we really want is the code pertaining to the hidden code, the rest we did with the global variables.
-	#So we can just split the whole string by semi-colons and get the third to last element in the list. The third to last because there are two semi-colons at the end. 
-	code = js_list[-3]
-	#Encode string into unicode escape
-	code = code.encode('unicode_escape')
-	#Remove the \u from the character, that is the global variable name
-	code = code.replace('\\u','')
-	#Remove the function calls at the beginning and end of javascript
-	code = code[45:-7]
-
-	#Add quotations to call dictionary elements from string (probably unecessary.)
-	code = code.replace('[','["')
-	code = code.replace(']','"]')
-	
-	#Remove all comments from code
-	# see https://stackoverflow.com/questions/5989315/regex-for-match-replacing-javascript-comments-both-multiline-and-inline
-	p = re.compile('\/\*.+?\*\/|\/\/.*(?=[\n\r])')
-	code = p.sub('',code)
-
-	#split code to get individual variables
-	code_list = code.split('+')
-
-	#for each element in code_list, try eval, if it succeeds add it to complete, 
-	#otherwise add the next element to it and try eval again. Repeat until eval is successful. 
-	idx = 0
-	eval_this = code_list[idx]
-	complete = str(iseval(eval_this))
-	complete = ''
-	while idx < len(code_list)-1:
-		if iseval(eval_this):
-			complete = complete + str(eval(eval_this))
-			idx = idx + 1
-			eval_this = str(code_list[idx])
-		else:
-			eval_this = eval_this + '+' + str(code_list[idx+1])
-			idx = idx + 1
-
-	#the variable complete is something like return\\"\\NNNN\\NNNN\\NNNN
-	#remove return\\" and keep the escaped string 
-	complete = complete.replace('return\\"','')
-	#unescape double back slash
-	complete = complete.replace('\\\\','\\')
-	#convert escaped string to unicode characters
-	complete = complete.decode('unicode_escape')
-	return complete
-
-def iseval(character):
-	try:
-		eval(character)
-		return True
-	except:
-		return False
 
 def getShowInfo(title):
 	desc_file = os.path.join(DESC_PATH, 'shows.json')
@@ -263,8 +335,6 @@ def play_video(selection):
 				code = script.string
 				# Here is the call to the first part of the deobfuscation i.e. getting packed code
 				code = aadecode(code)
-
-				xbmc.log(code, xbmc.LOGNOTICE)
 	#The second part of deobfuscation occurs here. Using module jsbeautifier. 
 	unpacked = packer.unpack(code)
 	video_location = unpacked[unpacked.rfind('http'):unpacked.rfind('m3u8')+4]
