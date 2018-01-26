@@ -16,6 +16,7 @@ import re
 base_url = sys.argv[0]
 addon_handle = int(sys.argv[1])
 args = urlparse.parse_qs(sys.argv[2][1:])
+
 arconaitv_url = "https://www.arconaitv.xyz/"
 mode = args.get('mode', None)
 
@@ -30,7 +31,7 @@ def evalxor(str):
 	index = 0
 	value = vars_list[vars[index].strip()]
 	while index < len(vars)-1:
-		value = value^ vars_list[vars[index+1].strip()]
+		value = value^vars_list[vars[index+1].strip()]
 		index=index+1
 	return value
 
@@ -96,26 +97,37 @@ def aadecode(objscode):
 
 	# First we split the code by semi-colon. We only want the third to last entrie because that is the obfuscated javascript. The rest we do in python.
 	js_list = objscode.split(';')
-	code = js_list[-3]
+	try:
+		code = js_list[-3]
+	except:
+		return "fail"
 	# unicode_escape the code so that we can use regular letters and numbers and not those funky symbols
 	code = code.encode('unicode_escape')
 
 	code = code.replace('\\u','')
-	code = code[45:-7]
+	# This regular expression trims off the function calls. We aren't interested in executing the javascript.
+	try:
+		start = r'\(ff9f0414ff9f\) \[\'_\'\] \( \(ff9f0414ff9f\) \[\'_\'\] \('
+		end = r'\) \(ff9f0398ff9f\)\) \(\'_\'\)'
+		code = re.search(start+r'(.*?)'+end,code).group(1)
+	except:
+		return 'fail'
 
 	#Remove all comments from code
     # see https://stackoverflow.com/questions/5989315/regex-for-match-replacing-javascript-comments-both-multiline-and-inline
 	p = re.compile('\/\*.+?\*\/|\/\/.*(?=[\n\r])')
 	code = p.sub('',code)
 
+	# At this point we have the pure encoded javascript. 
 	# Split all the code by plus sign.
 	code_list = code.split('+')
 	new_list = []
 	idx=0
 
+	# This is where the decoding happens. It is the previously declared variables concatenated, summed or subtracted and encoded in ascii and escaped.
 	while idx<len(code_list):
 		code = code_list[idx].strip()
-		#First get all the values in single parentheses and evaluate it
+		#First get all the values in single parentheses and evaluate them
 		if code.startswith('(') and not code.startswith('((') and code.endswith(')') and not code.endswith('))') and not '[' in code:
 			code = code.replace('(','')
 			code = code.replace(')','')
@@ -126,7 +138,7 @@ def aadecode(objscode):
 				value = evalxor(code)
 				new_list.append(value)
 			idx=idx+1
-		#These are the dictionaries or objects in js
+		#These are the dictionaries or objects in js. They take the form (object)[attribute]
 		elif '[' in code and code.endswith(']'):
 			code = code.replace('(','')
 			code = code.replace(')','')
@@ -136,11 +148,12 @@ def aadecode(objscode):
 			new_list.append(code)
 			idx=idx+1
 		#At the end there is an object that has another variable after it so it doesn't end in a bracket.
-		# it only occurs once and it's only a quotation mars so it is safe to delete.
+		# it only occurs once and it's only a quotation mars so it is safe to delete. 
+		# This may be an error an this check might be unnecessary
 		elif '[' in code and not code.endswith(']'):
 			new_list.append(code)
 			idx=idx+1
-		#Double parentheses stuff adding and subtracting values
+		#The stuff in double paranthesis seems to be arithmetic. 
 		elif code.startswith('(('):
 			while not code.endswith('))'):
 				idx=idx+1
@@ -151,6 +164,7 @@ def aadecode(objscode):
 				index=0
 				while index < len(add_this):
 					add_this[index] = add_this[index].replace('(','').replace(')','')
+					# This evaluates the xor that occur as (o^_^o) or similar
 					if '^' in add_this[index]:
 						add_this[index] = evalxor(add_this[index])
 					else:
@@ -158,6 +172,7 @@ def aadecode(objscode):
 					index = index+1
 				code = add_this[0] + add_this[1]
 
+			# Essentially the same as the adding loop but subtracting.
 			elif '-' in code:
 				sub_this = code.split('-')
 				index=0
@@ -172,7 +187,7 @@ def aadecode(objscode):
 			new_list.append(code)
 			idx=idx+1
 		else:
-			#The default if the variable just occurs on its own 
+			#The default if the variable just occurs with no parenthesis or brackets. 
 			code = vars_list[code]
 			new_list.append(code)
 			idx=idx+1
@@ -186,6 +201,7 @@ def aadecode(objscode):
 		complete = complete+str(new_list[idx])
 		idx=idx+1
 
+	# Since the code is escape ascii encoded, decode twice to get unicode. 
 	return complete.decode('unicode_escape').decode('unicode_escape').strip()
 
 def build_url(query):
@@ -202,7 +218,7 @@ def getShowInfo(title):
 		if title == show['title']:
 			return show
 
-	return {'title':title+' wtf','description':'wtf','poster':'DefaultVideo.png'} # Should Never Get Here
+	return {'title':title,'description':'New Show!','poster':'DefaultVideo.png'} # Should Never Get Here
 
 def getCableInfo(title):
 	desc_file = os.path.join(DESC_PATH, 'cable.json')
@@ -215,7 +231,7 @@ def getCableInfo(title):
 		if title == cable['station']:
 			return cable
 
-	return {'title':title+' wtf','description':'wtf','logo':'DefaultVideo.png'} # Should Never Get Here
+	return {'title':title,'description':'New Channel!','logo':'DefaultVideo.png'} # Should Never Get Here
 
 def list_categories():
 	url = build_url({'mode': 'shows'})
@@ -248,8 +264,13 @@ def list_shows():
 	arconaitv_r = requests.get(arconaitv_url+"index.php")
 	html_text = arconaitv_r.text.encode('ascii', 'ignore')
 	soup = BeautifulSoup(html_text, 'html.parser')
-	shows = soup.find("div", id="shows")
-	boxes = shows.find_all("div", class_="box-content")
+	# Put in a try statement to check that the html code is what we expect it to be.
+	try:
+		shows = soup.find("div", id="shows")
+		boxes = shows.find_all("div", class_="box-content")
+	except AttributeError:
+		xbmcgui.Dialog().ok("Sorry","The website has changed or we are downloading from wrong website.")
+		return
 
 	listItemlist = []
 	for box in boxes:
@@ -273,55 +294,64 @@ def list_shows():
 
 def list_cable():
 	arconaitv_r = requests.get(arconaitv_url+"index.php")
-        html_text = arconaitv_r.text.encode('ascii', 'ignore')
-        soup = BeautifulSoup(html_text, 'html.parser')
-        cable = soup.find("div", id="cable")
-        boxes = cable.find_all("div", class_="box-content")
+	html_text = arconaitv_r.text.encode('ascii', 'ignore')
+	soup = BeautifulSoup(html_text, 'html.parser')
+	# Put in try statement to check that html code is what we expect it to be. 
+	try:
+		cable = soup.find("div", id="cable")
+		boxes = cable.find_all("div", class_="box-content")
+	except AttributeError:
+		xbmcgui.Dialog().ok("Sorry","The website has changed or we are downloading from wrong website.")
+		return
 
-        listItemlist = []
-        for box in boxes:
-                if box.a == None:
-                        continue
+	listItemlist = []
+	for box in boxes:
+		if box.a == None:
+			continue
 
-                url = build_url({'mode': 'play', 'selection': box.a["href"]})
-                title = box.a["title"].strip()
+		url = build_url({'mode': 'play', 'selection': box.a["href"]})
+		title = box.a["title"].strip()
 		cableInfo = getCableInfo(title)
-                li = xbmcgui.ListItem(title, iconImage=cableInfo['logo'])
+		li = xbmcgui.ListItem(title, iconImage=cableInfo['logo'])
 		il={"Title": title,"mediatype":"video","plot": cableInfo['description'],"plotoutline": cableInfo['description']}
 		li.setProperty('IsPlayable', 'true')
-                li.setInfo(type='video', infoLabels=il)
-                listItemlist.append([url,li,False])
+		li.setInfo(type='video', infoLabels=il)
+		listItemlist.append([url,li,False])
 
-        listLength = len(listItemlist)
-        xbmcplugin.addDirectoryItems(handle=addon_handle, items=listItemlist, totalItems=listLength)
-        xbmcplugin.setContent(addon_handle, 'tvshows')
-        xbmcplugin.endOfDirectory(addon_handle)
+	listLength = len(listItemlist)
+	xbmcplugin.addDirectoryItems(handle=addon_handle, items=listItemlist, totalItems=listLength)
+	xbmcplugin.setContent(addon_handle, 'tvshows')
+	xbmcplugin.endOfDirectory(addon_handle)
 
 def list_movies():
 	arconaitv_r = requests.get(arconaitv_url+"index.php")
 	html_text = arconaitv_r.text.encode('ascii','ignore')
 	soup = BeautifulSoup(html_text, 'html.parser')
-	movies = soup.find("div", id="movies")
-        boxes = movies.find_all("div", class_="box-content")
+	try:
+		movies = soup.find("div", id="movies")
+		boxes = movies.find_all("div", class_="box-content")
+	except AttributeError:
+		xbmcgui.Dialog().ok("Sorry","The website has changed or we are downloading from wrong website.")
+		return
 
-        listItemlist = []
-        for box in boxes:
-                if box.a == None:
-                        continue
+	listItemlist = []
+	for box in boxes:
+		if box.a == None:
+			continue
 
-                url = build_url({'mode': 'play', 'selection': box.a["href"]})
-                title = box.a["title"]
-                li = xbmcgui.ListItem(title, iconImage='DefaultVideo.png')
+		url = build_url({'mode': 'play', 'selection': box.a["href"]})
+		title = box.a["title"]
+		li = xbmcgui.ListItem(title, iconImage='DefaultVideo.png')
 		il={"Title": title,"mediatype":"video"}
 		li.setProperty('IsPlayable', 'True')
 		li.setProperty('mimetype', 'application/x-mpegURL') 
-                li.setInfo(type='video', infoLabels=il)
-                listItemlist.append([url,li,False])
+		li.setInfo(type='video', infoLabels=il)
+		listItemlist.append([url,li,False])
 
-        listLength = len(listItemlist)
-        xbmcplugin.addDirectoryItems(handle=addon_handle, items=listItemlist, totalItems=listLength)
-        xbmcplugin.setContent(addon_handle, 'movies')
-        xbmcplugin.endOfDirectory(addon_handle)
+	listLength = len(listItemlist)
+	xbmcplugin.addDirectoryItems(handle=addon_handle, items=listItemlist, totalItems=listLength)
+	xbmcplugin.setContent(addon_handle, 'movies')
+	xbmcplugin.endOfDirectory(addon_handle)
 
 
 def play_video(selection):
@@ -335,11 +365,20 @@ def play_video(selection):
 				code = script.string
 				# Here is the call to the first part of the deobfuscation i.e. getting packed code
 				code = aadecode(code)
+				break
+			else:
+				code = 'fail'
+		else:
+			code = 'fail'
 	#The second part of deobfuscation occurs here. Using module jsbeautifier. 
-	unpacked = packer.unpack(code)
-	video_location = unpacked[unpacked.rfind('http'):unpacked.rfind('m3u8')+4]
-	play_item = xbmcgui.ListItem(path=video_location+'|User-Agent=%s' % urllib2.quote(USER_AGENT, safe=''))
-	xbmcplugin.setResolvedUrl(addon_handle, True, listitem=play_item)
+	if code != 'fail':
+		xbmc.log(code,xbmc.LOGNOTICE)
+		unpacked = packer.unpack(code)
+		video_location = unpacked[unpacked.rfind('http'):unpacked.rfind('m3u8')+4]
+		play_item = xbmcgui.ListItem(path=video_location+'|User-Agent=%s' % urllib2.quote(USER_AGENT, safe=''))
+		xbmcplugin.setResolvedUrl(addon_handle, True, listitem=play_item)
+	else:
+		xbmcgui.Dialog().ok('Sorry','Could not deobfuscate the code.')
 
 def router(params):
 	if params:
