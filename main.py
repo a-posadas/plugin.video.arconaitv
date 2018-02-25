@@ -183,9 +183,12 @@ def play_video(selection):
 		if script.string is not None:
 			if "document.getElementsByTagName('video')[0].volume = 1.0;" in script.string:
 				code = script.string
+				startidx = code.find('eval(function(p,a,c,k,e,')
+				endidx = code.find('hunterobfuscator =')
+				code = code[startidx:endidx]
 				# Here is the call to the first part of the deobfuscation i.e. getting packed code
-				code = aadecode(code)
-				code = code.aadecode()
+				#code = aadecode(code)
+				#code = code.aadecode()
 				if not code.replace(' ', '').startswith('eval(function(p,a,c,k,e,'):
 					code = 'fail'
 				break
