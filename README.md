@@ -36,3 +36,6 @@ Kodi installation will automatically download and install the libraries once you
 This addon is not organized, there is no real version and I update it sporadically. There is also the problem of the content the addon scrapes. For this reason, I do not condone the use of this addon. I am using my freespeech rights to explain something in detail with no intention of its being used in the manner described. 
 
 01/26/2018 made the deobfuscator a class that can be used in different projects. It takes in a unicode string. Make sure it's unicode. 
+
+If you're buying stuff from amazon, use these links
+https://technicology52263854.wordpress.com/2018/04/27/the-journey-begins/
