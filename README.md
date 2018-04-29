@@ -37,5 +37,6 @@ This addon is not organized, there is no real version and I update it sporadical
 
 01/26/2018 made the deobfuscator a class that can be used in different projects. It takes in a unicode string. Make sure it's unicode. 
 
-If you're buying stuff from amazon, use these links
+Check out my blog!
+
 https://technicology52263854.wordpress.com/2018/04/27/the-journey-begins/
